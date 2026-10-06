@@ -1,281 +1,40 @@
 const Games={};
+
+function celebrateGame(title,subtitle){
+  const old=document.getElementById("gameCelebration");
+  if(old)old.remove();
+  const el=document.createElement("div");
+  el.id="gameCelebration";
+  el.className="game-celebration";
+  el.innerHTML='<div class="confetti" aria-hidden="true">🎉 ✦ ⭐ ✦ 🎊 ✦ ⭐ ✦ 🎉</div><div class="trophy" aria-hidden="true">🏆</div><h2>'+title+'</h2><p>'+subtitle+'</p><div class="celebrate-stars" aria-hidden="true">✦ ✦ ✦</div>';
+  root.appendChild(el);
+  setTimeout(()=>el.classList.add("show"),20);
+}
+
 Games.wordle=function wordle(){
 let A=["APPLE","BRAIN","CLOUD","CRANE","DREAM","EARTH","FLAME","GRAPE","HOUSE","LIGHT","MUSIC","NIGHT","OCEAN","PIANO","PLANT","QUEST","RADIO","RIVER","SHARE","SMILE","SPACE","STONE","STORM","TABLE","TRAIN","TRUST","WATER","WORLD","WRITE","ZEBRA","ABOUT","ABOVE","AFTER","AGAIN","ALONE","ANGEL","BEACH","BLACK","BLAME","BLEND","BRAVE","BREAD","BREAK","BRING","BROWN","CHAIR","CHECK","CHESS","CHILD","CLEAN","CLEAR","CLIMB","CLOCK","CLOSE","COACH","COAST","COLOR","COUNT","COURT","COVER","CRISP","CROWN","DAILY","DANCE","DRINK","DRIVE","EARLY","EMPTY","ENJOY","ENTER","EQUAL","FAITH","FIELD","FINAL","FIRST","FRESH","FRONT","FRUIT","GIANT","GLASS","GLOBE","GREAT","GREEN","GROUP","HAPPY","HEART","HEAVY","HORSE","HOTEL","IMAGE","INDEX","INNER","INPUT","ISSUE","JUICE","KNIFE","LARGE","LEARN","LEAST","LEMON","LEVEL","LOCAL","MAGIC","MAJOR","MARCH","MATCH","MAYBE","MODEL","MONEY","MONTH","MOUSE","MOVIE","NEVER","NORTH","OFFER","ORDER","OTHER","PAINT","PAPER","PARTY","PEACE","PHONE","PIECE","PILOT","PLACE","PLAIN","PLANE","POINT","POWER","PRESS","PRICE","PRIDE","PRIME","PRINT","PROUD","QUICK","QUIET","QUEEN","RAISE","REACH","READY","RIGHT","ROUND","ROYAL","SCALE","SCORE","SHAPE","SHORT","SIGHT","SIMPLE","SKILL","SMALL","SMART","SOLID","SOUND","SOUTH","SPEAK","SPEED","SPEND","SPORT","STAGE","START","STATE","STEAM","STEEL","STICK","STILL","STOCK","STORE","STORY","STUDY","SUGAR","TEACH","THANK","THEME","THERE","THICK","THING","THINK","THROW","TIGER","TODAY","TOPIC","TOTAL","TOUCH","TOWER","TRACK","TRADE","TREAT","TRUTH","UNCLE","UNDER","UNION","UNITY","UNTIL","UPPER","VALUE","VIDEO","VISIT","VOICE","WATCH","WHICH","WHITE","WHOLE","WOMAN","WORRY","YOUNG","ZEBRA"],
 ans=A[Math.random()*A.length|0],g=Array.from({length:6},()=>Array(5).fill("")),states=Array.from({length:6},()=>Array(5).fill("")),r=0,c=0,done=false;
 root.innerHTML='<div class="toolbar"><span class="pill">6 attempts</span><span class="pill">5 letters</span><button class="ghost" id="hintBtn">💡 Hint</button></div><div class="wordle-layout"><div class="wb" id="wb"></div><div class="keys" id="keys"></div></div><div class="msg" id="wm">Type a word or use the keyboard.</div>';
-function draw(){
-wb.innerHTML=g.map((x,i)=>'<div class="wr">'+x.map((v,j)=>'<div class="wc '+(v?"filled ":"")+(states[i][j]||"")+'">'+v+"</div>").join("")+"</div>").join("");
-keys.innerHTML=["QWERTYUIOP","ASDFGHJKL","ZXCVBNM"].map((x,i)=>'<div class="kr">'+(i==2?'<button class="key wide" data-k="ENTER">ENTER</button>':"")+x.split("").map(k=>'<button class="key" data-k="'+k+'">'+k+"</button>").join("")+(i==2?'<button class="key wide" data-k="BACK">⌫</button>':"")+"</div>").join("");
-keys.querySelectorAll("button").forEach(b=>b.onclick=()=>press(b.dataset.k));
-updateKeyboard();
-}
-function updateKeyboard(){
-const rank={absent:1,present:2,correct:3},best={};
-states.forEach(row=>row.forEach((st,i)=>{if(st){let ch=g[states.indexOf(row)][i];if(!best[ch]||rank[st]>rank[best[ch]])best[ch]=st}}));
-keys.querySelectorAll(".key").forEach(b=>{let k=b.dataset.k;if(best[k])b.classList.add(best[k])});
-}
-function press(k){
-if(done)return;
-if(k=="BACK"){if(c){c--;g[r][c]=""}}
-else if(k=="ENTER")submit();
-else if(/^[A-Z]$/.test(k)&&c<5)g[r][c++]=k;
-draw();
-}
-function submit(){
-if(c<5){wm.textContent="Enter 5 letters.";return}
-let q=g[r].join("");
-if(!A.includes(q)){wm.textContent="Not in the Wordle word list.";return}
-let remaining={};ans.split("").forEach(ch=>remaining[ch]=(remaining[ch]||0)+1);
-let result=Array(5).fill("absent");
-q.split("").forEach((ch,i)=>{if(ch==ans[i]){result[i]="correct";remaining[ch]--}});
-q.split("").forEach((ch,i)=>{if(result[i]=="absent"&&remaining[ch]>0){result[i]="present";remaining[ch]--}});
-states[r]=result;
-draw();
-if(q==ans){done=true;wm.textContent="Solved in "+(r+1)+" tries! 🎉";record("wordle",r+1)}
-else if(r==5){done=true;wm.textContent="The word was "+ans+"."}
-else{r++;c=0;wm.textContent="Try again — green = correct, yellow = wrong position, white = not in word."}
-draw();
-}
-const keyHandler=e=>{if(!modal.classList.contains("off")){if(e.key=="Enter")press("ENTER");else if(e.key=="Backspace")press("BACK");else if(/^[a-zA-Z]$/.test(e.key))press(e.key.toUpperCase())}};
-document.addEventListener("keydown",keyHandler);
-cleanupGame=()=>document.removeEventListener("keydown",keyHandler);
-draw();
-$("#hintBtn").onclick=()=>{let missing=ans.split("").map((ch,i)=>g.flat().includes(ch)?null:(i+1)+":"+ch).filter(Boolean);wm.textContent=missing.length?"💡 Hint: position "+missing[0].split(":")[0]+" is '"+missing[0].split(":")[1]+"'.":"💡 Hint: use the colors from your previous guesses.";
-};
-}
+function draw(){wb.innerHTML=g.map((x,i)=>'<div class="wr">'+x.map((v,j)=>'<div class="wc '+(v?"filled ":"")+(states[i][j]||"")+'">'+v+"</div>").join("")+"</div>").join("");keys.innerHTML=["QWERTYUIOP","ASDFGHJKL","ZXCVBNM"].map((x,i)=>'<div class="kr">'+(i==2?'<button class="key wide" data-k="ENTER">ENTER</button>':"")+x.split("").map(k=>'<button class="key" data-k="'+k+'">'+k+"</button>").join("")+(i==2?'<button class="key wide" data-k="BACK">⌫</button>':"")+"</div>").join("");keys.querySelectorAll("button").forEach(b=>b.onclick=()=>press(b.dataset.k));updateKeyboard()}
+function updateKeyboard(){const rank={absent:1,present:2,correct:3},best={};states.forEach(row=>row.forEach((st,i)=>{if(st){let ch=g[states.indexOf(row)][i];if(!best[ch]||rank[st]>rank[best[ch]])best[ch]=st}}));keys.querySelectorAll(".key").forEach(b=>{let k=b.dataset.k;if(best[k])b.classList.add(best[k])})}
+function press(k){if(done)return;if(k=="BACK"){if(c){c--;g[r][c]=""}}else if(k=="ENTER")submit();else if(/^[A-Z]$/.test(k)&&c<5)g[r][c++]=k;draw()}
+function submit(){if(c<5){wm.textContent="Enter 5 letters.";return}let q=g[r].join("");if(!A.includes(q)){wm.textContent="Not in the Wordle word list.";return}let remaining={};ans.split("").forEach(ch=>remaining[ch]=(remaining[ch]||0)+1);let result=Array(5).fill("absent");q.split("").forEach((ch,i)=>{if(ch==ans[i]){result[i]="correct";remaining[ch]--}});q.split("").forEach((ch,i)=>{if(result[i]=="absent"&&remaining[ch]>0){result[i]="present";remaining[ch]--}});states[r]=result;draw();if(q==ans){done=true;wm.textContent="Solved in "+(r+1)+" tries! 🎉";record("wordle",r+1);celebrateGame("Wordle Champion!","Solved in "+(r+1)+" "+((r+1)==1?"try":"tries")+" — amazing work!")}else if(r==5){done=true;wm.textContent="The word was "+ans+"."}else{r++;c=0;wm.textContent="Try again — green = correct, yellow = wrong position, white = not in word."}draw()}
+const keyHandler=e=>{if(!modal.classList.contains("off")){if(e.key=="Enter")press("ENTER");else if(e.key=="Backspace")press("BACK");else if(/^[a-zA-Z]$/.test(e.key))press(e.key.toUpperCase())}};document.addEventListener("keydown",keyHandler);cleanupGame=()=>document.removeEventListener("keydown",keyHandler);draw();$("#hintBtn").onclick=()=>{let missing=ans.split("").map((ch,i)=>g.flat().includes(ch)?null:(i+1)+":"+ch).filter(Boolean);wm.textContent=missing.length?"💡 Hint: position "+missing[0].split(":")[0]+" is '"+missing[0].split(":")[1]+"'.":"💡 Hint: use the colors from your previous guesses."}}
 Games.chess=function chess(){
-let B=[
-["♜","♞","♝","♛","♚","♝","♞","♜"],
-["♟","♟","♟","♟","♟","♟","♟","♟"],
-["","","","","","","",""],
-["","","","","","","",""],
-["","","","","","","",""],
-["","","","","","","",""],
-["♙","♙","♙","♙","♙","♙","♙","♙"],
-["♖","♘","♗","♕","♔","♗","♘","♖"]
-];
-const white=new Set(["♙","♖","♘","♗","♕","♔"]);
-let turn="w",selected=null,legal=[],gameOver=false;
-root.innerHTML='<div class="toolbar"><span class="pill" id="turn">White to move</span><button class="ghost" id="resetC">Reset</button></div><div class="chess-wrap"><div class="cb" id="cb"></div></div><div class="msg" id="cm">Select a piece to see its legal moves.</div>';
-const cb=$("#cb"),cm=$("#cm");
-
-function color(piece){return white.has(piece)?"w":"b"}
-function type(piece){
-if("♙♟".includes(piece))return"p";
-if("♖♜".includes(piece))return"r";
-if("♘♞".includes(piece))return"n";
-if("♗♝".includes(piece))return"b";
-if("♕♛".includes(piece))return"q";
-return"k";
-}
-function inside(r,c){return r>=0&&r<8&&c>=0&&c<8}
-function addStep(out,r,c,own){
-if(!inside(r,c))return false;
-if(!B[r][c]){out.push([r,c]);return true}
-if(color(B[r][c])!==own)out.push([r,c]);
-return false;
-}
-function moves(r,c){
-const piece=B[r][c];
-if(!piece)return[];
-const own=color(piece),t=type(piece),out=[];
-if(t==="p"){
-const d=own==="w"?-1:1;
-const startRow=own==="w"?6:1;
-if(inside(r+d,c)&&!B[r+d][c]){
-out.push([r+d,c]);
-if(r===startRow&&!B[r+2*d][c])out.push([r+2*d,c]);
-}
-for(const dc of[-1,1]){
-const rr=r+d,cc=c+dc;
-if(inside(rr,cc)&&B[rr][cc]&&color(B[rr][cc])!==own)out.push([rr,cc]);
-}
-}else if(t==="n"){
-for(const [dr,dc] of[[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]])addStep(out,r+dr,c+dc,own);
-}else if(t==="k"){
-for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++)if(dr||dc)addStep(out,r+dr,c+dc,own);
-}else{
-const dirs=[];
-if(t==="b"||t==="q")dirs.push([1,1],[1,-1],[-1,1],[-1,-1]);
-if(t==="r"||t==="q")dirs.push([1,0],[-1,0],[0,1],[0,-1]);
-for(const [dr,dc] of dirs){
-let rr=r+dr,cc=c+dc;
-while(inside(rr,cc)){
-if(!B[rr][cc])out.push([rr,cc]);
-else{
-if(color(B[rr][cc])!==own)out.push([rr,cc]);
-break;
-}
-rr+=dr;cc+=dc;
-}
-}
-}
-return out;
-}
-function draw(){
-cb.innerHTML="";
-for(let r=0;r<8;r++){
-for(let c=0;c<8;c++){
-const cell=document.createElement("button");
-cell.type="button";
-cell.className="sq "+((r+c)%2?"dark":"light");
-cell.dataset.r=r;
-cell.dataset.c=c;
-cell.textContent=B[r][c];
-if(selected&&selected[0]===r&&selected[1]===c)cell.classList.add("selected");
-if(legal.some(([rr,cc])=>rr===r&&cc===c))cell.classList.add("legal");
-cb.appendChild(cell);
-}
-}
-}
-function choose(r,c){
-if(gameOver)return;
-const piece=B[r][c];
-
-if(selected){
-const isLegal=legal.some(([rr,cc])=>rr===r&&cc===c);
-if(isLegal){
-const [sr,sc]=selected;
-const moving=B[sr][sc];
-const captured=B[r][c];
-B[r][c]=moving;
-B[sr][sc]="";
-
-if(moving==="♙"&&r===0)B[r][c]="♕";
-if(moving==="♟"&&r===7)B[r][c]="♛";
-
-selected=null;
-legal=[];
-if(captured==="♔"||captured==="♚"){
-gameOver=true;
-cm.textContent=(turn==="w"?"White":"Black")+" wins! King captured. Press Reset to play again.";
-}else{
-turn=turn==="w"?"b":"w";
-$("#turn").textContent=turn==="w"?"White to move":"Black to move";
-cm.textContent="Select a "+(turn==="w"?"white":"black")+" piece.";
-}
-draw();
-return;
-}
-}
-
-if(piece&&color(piece)===turn){
-selected=[r,c];
-legal=moves(r,c);
-cm.textContent=legal.length?"Choose a highlighted square.":"That piece has no legal moves.";
-}else{
-selected=null;
-legal=[];
-cm.textContent="Select a "+(turn==="w"?"white":"black")+" piece.";
-}
-draw();
-}
-
-cb.addEventListener("click",e=>{
-const cell=e.target.closest(".sq");
-if(!cell)return;
-choose(Number(cell.dataset.r),Number(cell.dataset.c));
-});
-$("#resetC").onclick=()=>openGame("chess");
-cleanupGame=()=>{};
-draw();
-}
+let B=[["♜","♞","♝","♛","♚","♝","♞","♜"],["♟","♟","♟","♟","♟","♟","♟","♟"],["","","","","","","",""],["","","","","","","",""],["","","","","","","",""],["","","","","","","",""],["♙","♙","♙","♙","♙","♙","♙","♙"],["♖","♘","♗","♕","♔","♗","♘","♖"]],white=new Set(["♙","♖","♘","♗","♕","♔"]);let turn="w",selected=null,legal=[],gameOver=false;
+root.innerHTML='<div class="toolbar"><span class="pill" id="turn">White to move</span><button class="ghost" id="resetC">Reset</button></div><div class="chess-wrap"><div class="cb" id="cb"></div></div><div class="msg" id="cm">Select a piece to see its legal moves.</div>';const cb=$("#cb"),cm=$("#cm");
+function color(piece){return white.has(piece)?"w":"b"}function type(piece){if("♙♟".includes(piece))return"p";if("♖♜".includes(piece))return"r";if("♘♞".includes(piece))return"n";if("♗♝".includes(piece))return"b";if("♕♛".includes(piece))return"q";return"k"}function inside(r,c){return r>=0&&r<8&&c>=0&&c<8}function addStep(out,r,c,own){if(!inside(r,c))return false;if(!B[r][c]){out.push([r,c]);return true}if(color(B[r][c])!==own)out.push([r,c]);return false}
+function moves(r,c){const piece=B[r][c];if(!piece)return[];const own=color(piece),t=type(piece),out=[];if(t=="p"){const d=own=="w"?-1:1,startRow=own=="w"?6:1;if(inside(r+d,c)&&!B[r+d][c]){out.push([r+d,c]);if(r===startRow&&!B[r+2*d][c])out.push([r+2*d,c])}for(const dc of[-1,1]){const rr=r+d,cc=c+dc;if(inside(rr,cc)&&B[rr][cc]&&color(B[rr][cc])!==own)out.push([rr,cc])}}else if(t=="n"){for(const [dr,dc] of[[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]])addStep(out,r+dr,c+dc,own)}else if(t=="k"){for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++)if(dr||dc)addStep(out,r+dr,c+dc,own)}else{const dirs=[];if(t=="b"||t=="q")dirs.push([1,1],[1,-1],[-1,1],[-1,-1]);if(t=="r"||t=="q")dirs.push([1,0],[-1,0],[0,1],[0,-1]);for(const [dr,dc] of dirs){let rr=r+dr,cc=c+dc;while(inside(rr,cc)){if(!B[rr][cc])out.push([rr,cc]);else{if(color(B[rr][cc])!==own)out.push([rr,cc]);break}rr+=dr;cc+=dc}}}return out}
+function draw(){cb.innerHTML="";for(let r=0;r<8;r++)for(let c=0;c<8;c++){const cell=document.createElement("button");cell.type="button";cell.className="sq "+((r+c)%2?"dark":"light");cell.dataset.r=r;cell.dataset.c=c;cell.textContent=B[r][c];if(selected&&selected[0]===r&&selected[1]===c)cell.classList.add("selected");if(legal.some(([rr,cc])=>rr===r&&cc===c))cell.classList.add("legal");cb.appendChild(cell)}}
+function choose(r,c){if(gameOver)return;const piece=B[r][c];if(selected){const isLegal=legal.some(([rr,cc])=>rr===r&&cc===c);if(isLegal){const [sr,sc]=selected,moving=B[sr][sc],captured=B[r][c];B[r][c]=moving;B[sr][sc]="";if(moving==="♙"&&r===0)B[r][c]="♕";if(moving==="♟"&&r===7)B[r][c]="♛";selected=null;legal=[];if(captured==="♔"||captured==="♚"){gameOver=true;cm.textContent=(turn==="w"?"White":"Black")+" wins! King captured. Press Reset to play again.";celebrateGame((turn==="w"?"White":"Black")+" Wins!","Checkmate your opponent by capturing the king! 🏆")}else{turn=turn==="w"?"b":"w";$("#turn").textContent=turn==="w"?"White to move":"Black to move";cm.textContent="Select a "+(turn==="w"?"white":"black")+" piece."}draw();return}}if(piece&&color(piece)===turn){selected=[r,c];legal=moves(r,c);cm.textContent=legal.length?"Choose a highlighted square.":"That piece has no legal moves."}else{selected=null;legal=[];cm.textContent="Select a "+(turn==="w"?"white":"black")+" piece."}draw()}
+cb.addEventListener("click",e=>{const cell=e.target.closest(".sq");if(!cell)return;choose(Number(cell.dataset.r),Number(cell.dataset.c))});$("#resetC").onclick=()=>openGame("chess");cleanupGame=()=>{};draw()}
 Games.puzzle=function puzzle(){
-let url="",n=3,pieces=[],placed=[],moves=0,start=0,timer;
-cleanupGame=()=>{clearInterval(timer);if(url)URL.revokeObjectURL(url)};
-root.innerHTML='<div class="config"><div class="box"><label>Upload image</label><input id="file" type="file" accept="image/*"></div><div class="box"><label>Pieces / difficulty</label><select id="size"><option value="3">9 pieces — Easy</option><option value="4">16 pieces — Medium</option><option value="5">25 pieces — Hard</option><option value="6">36 pieces — Expert</option></select></div></div><div class="toolbar"><span class="pill" id="pt">Time: 0s</span><span class="pill" id="pm">Placed: 0 / 9</span><button class="ghost" id="newP">Shuffle</button></div><div class="puzzle-instructions">Drag each puzzle piece from the tray into the matching space.</div><div class="puzzle-game"><div class="puzzle-frame" id="pframe"></div><div class="piece-tray" id="ptray"></div></div><div id="pmsg" class="msg"></div>';
-
-const file=$("#file"),size=$("#size"),frame=$("#pframe"),tray=$("#ptray");
-file.onchange=()=>{if(file.files[0]){if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(file.files[0]);startP()}};
-size.onchange=()=>{n=+size.value;if(url)startP()};
-$("#newP").onclick=()=>url&&startP();
-
-function startP(){
-clearInterval(timer);
-n=+size.value;
-pieces=Array.from({length:n*n},(_,i)=>i).sort(()=>Math.random()-.5);
-placed=Array(n*n).fill(false);
-moves=0;
-start=Date.now();
-$("#pm").textContent="Placed: 0 / "+(n*n);
-$("#pt").textContent="Time: 0s";
-timer=setInterval(()=>$("#pt").textContent="Time: "+((Date.now()-start)/1000|0)+"s",500);
-draw();
-}
-
-function stylePiece(el,v){
-const vr=Math.floor(v/n),vc=v%n;
-el.style.backgroundImage='url("'+url+'")';
-el.style.backgroundSize=(n*100)+"% "+(n*100)+"%";
-el.style.backgroundPosition=(n===1?0:vc*100/(n-1))+"% "+(n===1?0:vr*100/(n-1))+"%";
-el.dataset.piece=v;
-}
-
-function pieceShape(v){
-const r=Math.floor(v/n),c=v%n;
-let shape="normal";
-if(r===0)shape+="-top";
-if(r===n-1)shape+="-bottom";
-if(c===0)shape+="-left";
-if(c===n-1)shape+="-right";
-return shape;
-}
-
-function makePiece(v,source){
-const el=document.createElement("div");
-el.className="jpiece "+pieceShape(v);
-el.draggable=true;
-stylePiece(el,v);
-el.title="Drag this piece";
-el.addEventListener("dragstart",e=>{
-e.dataTransfer.setData("text/plain",String(v));
-e.dataTransfer.effectAllowed="move";
-el.classList.add("dragging");
-});
-el.addEventListener("dragend",()=>el.classList.remove("dragging"));
-return el;
-}
-
-function draw(){
-frame.innerHTML="";
-tray.innerHTML="";
-frame.style.gridTemplateColumns="repeat("+n+",1fr)";
-tray.classList.toggle("compact",n>=5);
-
-for(let slot=0;slot<n*n;slot++){
-const target=document.createElement("div");
-target.className="puzzle-slot";
-target.dataset.slot=slot;
-target.addEventListener("dragover",e=>{e.preventDefault();target.classList.add("drop-ready")});
-target.addEventListener("dragleave",()=>target.classList.remove("drop-ready"));
-target.addEventListener("drop",e=>{
-e.preventDefault();
-target.classList.remove("drop-ready");
-const v=Number(e.dataTransfer.getData("text/plain"));
-if(v!==slot||placed[slot]){$("#pmsg").textContent="That piece doesn't fit there.";return}
-placed[slot]=true;
-moves++;
-target.classList.add("filled");
-const piece=makePiece(v);
-piece.draggable=false;
-piece.classList.add("locked");
-target.appendChild(piece);
-const source=tray.querySelector('[data-piece="'+v+'"]');
-if(source)source.remove();
-$("#pm").textContent="Placed: "+placed.filter(Boolean).length+" / "+(n*n);
-if(placed.every(Boolean)){
-clearInterval(timer);
-const seconds=(Date.now()-start)/1000|0;
-$("#pmsg").textContent="Puzzle complete in "+seconds+"s with "+moves+" pieces placed! 🎉";
-record("puzzle",seconds);
-}
-});
-frame.appendChild(target);
-}
-
-pieces.filter(v=>!placed[v]).forEach(v=>tray.appendChild(makePiece(v)));
-}
-
-draw();
-}
-Games.typing=function typing(){let texts=["The quick brown fox jumps over the lazy dog while the bright morning sun warms the quiet street.","Small improvements repeated every day can turn into remarkable results. Focus on accuracy first and speed will follow.","A good game gives your mind a challenge and a reason to try again. Stay calm, read carefully, and keep moving forward."],text=texts[Math.random()*texts.length|0],started=false,done=false,start=0,sec=30,timer;root.innerHTML='<div class="tstats"><div class="tstat"><strong id="sec">30</strong>seconds</div><div class="tstat"><strong id="wpm">0</strong>WPM</div><div class="tstat"><strong id="acc">100%</strong>accuracy</div></div><div class="target" id="target"></div><textarea class="typing" id="typing" placeholder="Click Start, then type the passage..." disabled></textarea><div class="toolbar"><button class="primary" id="startT">Start 30s test</button><button class="ghost" id="newT">New passage</button></div><div class="msg" id="tm">Accuracy first. Speed will follow.</div>';let ta=$("#typing");cleanupGame=()=>clearInterval(timer);function draw(){target.innerHTML=[...text].map((x,i)=>'<span class="'+(i<ta.value.length?(ta.value[i]==x?"good":"bad"):(i==ta.value.length?"current":""))+'">'+(x==" "?"&nbsp;":x)+"</span>").join("");let good=[...ta.value].filter((x,i)=>x==text[i]).length,a=ta.value.length?Math.round(good/ta.value.length*100):100,e=started?Math.max(.5,(Date.now()-start)/1000):1;wpm.textContent=Math.round(good/5/(e/60));acc.textContent=a+"%"}function finish(){if(done)return;done=true;clearInterval(timer);ta.disabled=true;tm.textContent="Time! Final score: "+wpm.textContent+" WPM at "+acc.textContent+" accuracy.";record("typing",+wpm.textContent)}startT.onclick=()=>{if(started&&!done)return;started=true;done=false;sec=30;start=Date.now();ta.disabled=false;ta.focus();timer=setInterval(()=>{sec--;$("#sec").textContent=sec;if(sec<=0)finish()},1000);draw()};ta.oninput=()=>{draw();if(ta.value.length>=text.length)finish()};newT.onclick=()=>typing();draw()}
+let url="",n=3,pieces=[],placed=[],moves=0,start=0,timer;cleanupGame=()=>{clearInterval(timer);if(url)URL.revokeObjectURL(url)};root.innerHTML='<div class="config"><div class="box"><label>Upload image</label><input id="file" type="file" accept="image/*"></div><div class="box"><label>Pieces / difficulty</label><select id="size"><option value="3">9 pieces — Easy</option><option value="4">16 pieces — Medium</option><option value="5">25 pieces — Hard</option><option value="6">36 pieces — Expert</option></select></div></div><div class="toolbar"><span class="pill" id="pt">Time: 0s</span><span class="pill" id="pm">Placed: 0 / 9</span><button class="ghost" id="newP">Shuffle</button></div><div class="puzzle-instructions">Drag each puzzle piece from the tray into the matching space.</div><div class="puzzle-game"><div class="puzzle-frame" id="pframe"></div><div class="piece-tray" id="ptray"></div></div><div id="pmsg" class="msg"></div>';
+const file=$("#file"),size=$("#size"),frame=$("#pframe"),tray=$("#ptray");file.onchange=()=>{if(file.files[0]){if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(file.files[0]);startP()}};size.onchange=()=>{n=+size.value;if(url)startP()};$("#newP").onclick=()=>url&&startP();
+function startP(){clearInterval(timer);n=+size.value;pieces=Array.from({length:n*n},(_,i)=>i).sort(()=>Math.random()-.5);placed=Array(n*n).fill(false);moves=0;start=Date.now();$("#pm").textContent="Placed: 0 / "+(n*n);$("#pt").textContent="Time: 0s";timer=setInterval(()=>$("#pt").textContent="Time: "+((Date.now()-start)/1000|0)+"s",500);draw()}
+function stylePiece(el,v){const vr=Math.floor(v/n),vc=v%n;el.style.backgroundImage='url("'+url+'")';el.style.backgroundSize=(n*100)+"% "+(n*100)+"%";el.style.backgroundPosition=(n===1?0:vc*100/(n-1))+"% "+(n===1?0:vr*100/(n-1))+"%";el.dataset.piece=v}
+function pieceShape(v){const r=Math.floor(v/n),c=v%n;let shape="normal";if(r===0)shape+="-top";if(r===n-1)shape+="-bottom";if(c===0)shape+="-left";if(c===n-1)shape+="-right";return shape}
+function makePiece(v,source){const el=document.createElement("div");el.className="jpiece "+pieceShape(v);el.draggable=true;stylePiece(el,v);el.title="Drag this piece";el.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",String(v));e.dataTransfer.effectAllowed="move";el.classList.add("dragging")});el.addEventListener("dragend",()=>el.classList.remove("dragging"));return el}
+function draw(){frame.innerHTML="";tray.innerHTML="";frame.style.gridTemplateColumns="repeat("+n+",1fr)";tray.classList.toggle("compact",n>=5);for(let slot=0;slot<n*n;slot++){const target=document.createElement("div");target.className="puzzle-slot";target.dataset.slot=slot;target.addEventListener("dragover",e=>{e.preventDefault();target.classList.add("drop-ready")});target.addEventListener("dragleave",()=>target.classList.remove("drop-ready"));target.addEventListener("drop",e=>{e.preventDefault();target.classList.remove("drop-ready");const v=Number(e.dataTransfer.getData("text/plain"));if(v!==slot||placed[slot]){$("#pmsg").textContent="That piece doesn't fit there.";return}placed[slot]=true;moves++;target.classList.add("filled");const piece=makePiece(v);piece.draggable=false;piece.classList.add("locked");target.appendChild(piece);const source=tray.querySelector('[data-piece="'+v+'"]');if(source)source.remove();$("#pm").textContent="Placed: "+placed.filter(Boolean).length+" / "+(n*n);if(placed.every(Boolean)){clearInterval(timer);const seconds=(Date.now()-start)/1000|0;$("#pmsg").textContent="Puzzle complete in "+seconds+"s with "+moves+" pieces placed! 🎉";record("puzzle",seconds);celebrateGame("Puzzle Master!","Completed in "+seconds+" seconds with all "+(n*n)+" pieces! 🧩")}});frame.appendChild(target)}pieces.filter(v=>!placed[v]).forEach(v=>tray.appendChild(makePiece(v)))}
+draw()}
+Games.typing=function typing(){let texts=["The quick brown fox jumps over the lazy dog while the bright morning sun warms the quiet street.","Small improvements repeated every day can turn into remarkable results. Focus on accuracy first and speed will follow.","A good game gives your mind a challenge and a reason to try again. Stay calm, read carefully, and keep moving forward."],text=texts[Math.random()*texts.length|0],started=false,done=false,start=0,sec=30,timer;root.innerHTML='<div class="tstats"><div class="tstat"><strong id="sec">30</strong>seconds</div><div class="tstat"><strong id="wpm">0</strong>WPM</div><div class="tstat"><strong id="acc">100%</strong>accuracy</div></div><div class="target" id="target"></div><textarea class="typing" id="typing" placeholder="Click Start, then type the passage..." disabled></textarea><div class="toolbar"><button class="primary" id="startT">Start 30s test</button><button class="ghost" id="newT">New passage</button></div><div class="msg" id="tm">Accuracy first. Speed will follow.</div>';let ta=$("#typing");cleanupGame=()=>clearInterval(timer);function draw(){target.innerHTML=[...text].map((x,i)=>'<span class="'+(i<ta.value.length?(ta.value[i]==x?"good":"bad"):(i==ta.value.length?"current":""))+'">'+(x==" "?"&nbsp;":x)+"</span>").join("");let good=[...ta.value].filter((x,i)=>x==text[i]).length,a=ta.value.length?Math.round(good/ta.value.length*100):100,e=started?Math.max(.5,(Date.now()-start)/1000):1;wpm.textContent=Math.round(good/5/(e/60));acc.textContent=a+"%"}function finish(){if(done)return;done=true;clearInterval(timer);ta.disabled=true;tm.textContent="Time! Final score: "+wpm.textContent+" WPM at "+acc.textContent+" accuracy.";record("typing",+wpm.textContent);celebrateGame("Speed Champion!","Final score: "+wpm.textContent+" WPM at "+acc.textContent+" accuracy! ⌨️")}startT.onclick=()=>{if(started&&!done)return;started=true;done=false;sec=30;start=Date.now();ta.disabled=false;ta.focus();timer=setInterval(()=>{sec--;$("#sec").textContent=sec;if(sec<=0)finish()},1000);draw()};ta.oninput=()=>{draw();if(ta.value.length>=text.length)finish()};newT.onclick=()=>typing();draw()}
