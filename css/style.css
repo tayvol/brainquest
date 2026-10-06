@@ -1039,3 +1039,22 @@ main{
   .game-celebration .trophy{font-size:48px}
   .game-celebration h2{font-size:23px}
 }
+
+/* Win celebration — keep it visible above the scrollable game panel */
+.game-celebration{
+  position:fixed;
+  left:50%;
+  top:50%;
+  width:min(430px,calc(100vw - 36px));
+  margin:0;
+  transform:translate(-50%,-46%) scale(.82);
+  z-index:1000;
+}
+.game-celebration.show{
+  animation:celebrationOverlayPop .55s cubic-bezier(.2,.9,.25,1.25) forwards;
+}
+@keyframes celebrationOverlayPop{
+  0%{opacity:0;transform:translate(-50%,-46%) scale(.82)}
+  65%{opacity:1;transform:translate(-50%,-50%) scale(1.03)}
+  100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
