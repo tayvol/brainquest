@@ -180,5 +180,102 @@ $("#resetC").onclick=()=>openGame("chess");
 cleanupGame=()=>{};
 draw();
 }
-Games.puzzle=function puzzle(){let url="",n=3,P=[],moves=0,start=0,timer;cleanupGame=()=>{clearInterval(timer);if(url)URL.revokeObjectURL(url)};root.innerHTML='<div class="config"><div class="box"><label>Upload image</label><input id="file" type="file" accept="image/*"></div><div class="box"><label>Pieces / difficulty</label><select id="size"><option value="3">9 — Easy</option><option value="4">16 — Medium</option><option value="5">25 — Hard</option><option value="6">36 — Expert</option></select></div></div><div class="toolbar"><span class="pill" id="pt">Time: 0s</span><span class="pill" id="pm">Moves: 0</span><button class="ghost" id="newP">New puzzle</button></div><div id="pboard" class="msg">Upload an image to start.</div><div id="pmsg" class="msg"></div>';let file=$("#file"),size=$("#size"),pb=$("#pboard");file.onchange=()=>{if(file.files[0]){url=URL.createObjectURL(file.files[0]);startP()}};size.onchange=()=>{n=+size.value;if(url)startP()};$("#newP").onclick=()=>url&&startP();function solved(){return P.every((v,i)=>v==i)}function startP(){clearInterval(timer);n=+size.value;P=Array.from({length:n*n},(_,i)=>i);do{for(let i=P.length-1;i;i--){let j=Math.random()*(i+1)|0;[P[i],P[j]]=[P[j],P[i]]}}while(solved());moves=0;start=Date.now();timer=setInterval(()=>$("#pt").textContent="Time: "+((Date.now()-start)/1000|0)+"s",500);draw()}function draw(){pb.innerHTML='<div class="pb" style="grid-template-columns:repeat('+n+',1fr)"></div>';let board=pb.firstChild;P.forEach((v,i)=>{let x=document.createElement("button");x.className="piece";let vr=v/n|0,vc=v%n,br=i/n|0,bc=i%n;x.style.backgroundImage='url("'+url+'")';x.style.backgroundSize=n*100+"% "+n*100+"%";x.style.backgroundPosition=(vc*100/(n-1))+"% "+(vr*100/(n-1))+"%";if(v==n*n-1)x.classList.add("empty");x.onclick=()=>swap(i);board.appendChild(x)});$("#pm").textContent="Moves: "+moves}let chosen=null;function swap(i){if(chosen==null)return chosen=i;if(chosen==i)return chosen=null;[P[chosen],P[i]]=[P[i],P[chosen]];chosen=null;moves++;draw();if(solved()){clearInterval(timer);let s=(Date.now()-start)/1000|0;$("#pmsg").textContent="Solved in "+s+"s with "+moves+" moves! 🎉";record("puzzle",s)}}}
+Games.puzzle=function puzzle(){
+let url="",n=3,pieces=[],placed=[],moves=0,start=0,timer;
+cleanupGame=()=>{clearInterval(timer);if(url)URL.revokeObjectURL(url)};
+root.innerHTML='<div class="config"><div class="box"><label>Upload image</label><input id="file" type="file" accept="image/*"></div><div class="box"><label>Pieces / difficulty</label><select id="size"><option value="3">9 pieces — Easy</option><option value="4">16 pieces — Medium</option><option value="5">25 pieces — Hard</option><option value="6">36 pieces — Expert</option></select></div></div><div class="toolbar"><span class="pill" id="pt">Time: 0s</span><span class="pill" id="pm">Placed: 0 / 9</span><button class="ghost" id="newP">Shuffle</button></div><div class="puzzle-instructions">Drag each puzzle piece from the tray into the matching space.</div><div class="puzzle-game"><div class="puzzle-frame" id="pframe"></div><div class="piece-tray" id="ptray"></div></div><div id="pmsg" class="msg"></div>';
+
+const file=$("#file"),size=$("#size"),frame=$("#pframe"),tray=$("#ptray");
+file.onchange=()=>{if(file.files[0]){if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(file.files[0]);startP()}};
+size.onchange=()=>{n=+size.value;if(url)startP()};
+$("#newP").onclick=()=>url&&startP();
+
+function startP(){
+clearInterval(timer);
+n=+size.value;
+pieces=Array.from({length:n*n},(_,i)=>i).sort(()=>Math.random()-.5);
+placed=Array(n*n).fill(false);
+moves=0;
+start=Date.now();
+$("#pm").textContent="Placed: 0 / "+(n*n);
+$("#pt").textContent="Time: 0s";
+timer=setInterval(()=>$("#pt").textContent="Time: "+((Date.now()-start)/1000|0)+"s",500);
+draw();
+}
+
+function stylePiece(el,v){
+const vr=Math.floor(v/n),vc=v%n;
+el.style.backgroundImage='url("'+url+'")';
+el.style.backgroundSize=(n*100)+"% "+(n*100)+"%";
+el.style.backgroundPosition=(n===1?0:vc*100/(n-1))+"% "+(n===1?0:vr*100/(n-1))+"%";
+el.dataset.piece=v;
+}
+
+function pieceShape(v){
+const r=Math.floor(v/n),c=v%n;
+let shape="normal";
+if(r===0)shape+="-top";
+if(r===n-1)shape+="-bottom";
+if(c===0)shape+="-left";
+if(c===n-1)shape+="-right";
+return shape;
+}
+
+function makePiece(v,source){
+const el=document.createElement("div");
+el.className="jpiece "+pieceShape(v);
+el.draggable=true;
+stylePiece(el,v);
+el.title="Drag this piece";
+el.addEventListener("dragstart",e=>{
+e.dataTransfer.setData("text/plain",String(v));
+e.dataTransfer.effectAllowed="move";
+el.classList.add("dragging");
+});
+el.addEventListener("dragend",()=>el.classList.remove("dragging"));
+return el;
+}
+
+function draw(){
+frame.innerHTML="";
+tray.innerHTML="";
+frame.style.gridTemplateColumns="repeat("+n+",1fr)";
+tray.classList.toggle("compact",n>=5);
+
+for(let slot=0;slot<n*n;slot++){
+const target=document.createElement("div");
+target.className="puzzle-slot";
+target.dataset.slot=slot;
+target.addEventListener("dragover",e=>{e.preventDefault();target.classList.add("drop-ready")});
+target.addEventListener("dragleave",()=>target.classList.remove("drop-ready"));
+target.addEventListener("drop",e=>{
+e.preventDefault();
+target.classList.remove("drop-ready");
+const v=Number(e.dataTransfer.getData("text/plain"));
+if(v!==slot||placed[slot]){$("#pmsg").textContent="That piece doesn't fit there.";return}
+placed[slot]=true;
+moves++;
+target.classList.add("filled");
+const piece=makePiece(v);
+piece.draggable=false;
+piece.classList.add("locked");
+target.appendChild(piece);
+const source=tray.querySelector('[data-piece="'+v+'"]');
+if(source)source.remove();
+$("#pm").textContent="Placed: "+placed.filter(Boolean).length+" / "+(n*n);
+if(placed.every(Boolean)){
+clearInterval(timer);
+const seconds=(Date.now()-start)/1000|0;
+$("#pmsg").textContent="Puzzle complete in "+seconds+"s with "+moves+" pieces placed! 🎉";
+record("puzzle",seconds);
+}
+});
+frame.appendChild(target);
+}
+
+pieces.filter(v=>!placed[v]).forEach(v=>tray.appendChild(makePiece(v)));
+}
+
+draw();
+}
 Games.typing=function typing(){let texts=["The quick brown fox jumps over the lazy dog while the bright morning sun warms the quiet street.","Small improvements repeated every day can turn into remarkable results. Focus on accuracy first and speed will follow.","A good game gives your mind a challenge and a reason to try again. Stay calm, read carefully, and keep moving forward."],text=texts[Math.random()*texts.length|0],started=false,done=false,start=0,sec=30,timer;root.innerHTML='<div class="tstats"><div class="tstat"><strong id="sec">30</strong>seconds</div><div class="tstat"><strong id="wpm">0</strong>WPM</div><div class="tstat"><strong id="acc">100%</strong>accuracy</div></div><div class="target" id="target"></div><textarea class="typing" id="typing" placeholder="Click Start, then type the passage..." disabled></textarea><div class="toolbar"><button class="primary" id="startT">Start 30s test</button><button class="ghost" id="newT">New passage</button></div><div class="msg" id="tm">Accuracy first. Speed will follow.</div>';let ta=$("#typing");cleanupGame=()=>clearInterval(timer);function draw(){target.innerHTML=[...text].map((x,i)=>'<span class="'+(i<ta.value.length?(ta.value[i]==x?"good":"bad"):(i==ta.value.length?"current":""))+'">'+(x==" "?"&nbsp;":x)+"</span>").join("");let good=[...ta.value].filter((x,i)=>x==text[i]).length,a=ta.value.length?Math.round(good/ta.value.length*100):100,e=started?Math.max(.5,(Date.now()-start)/1000):1;wpm.textContent=Math.round(good/5/(e/60));acc.textContent=a+"%"}function finish(){if(done)return;done=true;clearInterval(timer);ta.disabled=true;tm.textContent="Time! Final score: "+wpm.textContent+" WPM at "+acc.textContent+" accuracy.";record("typing",+wpm.textContent)}startT.onclick=()=>{if(started&&!done)return;started=true;done=false;sec=30;start=Date.now();ta.disabled=false;ta.focus();timer=setInterval(()=>{sec--;$("#sec").textContent=sec;if(sec<=0)finish()},1000);draw()};ta.oninput=()=>{draw();if(ta.value.length>=text.length)finish()};newT.onclick=()=>typing();draw()}
