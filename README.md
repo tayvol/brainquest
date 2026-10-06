@@ -9,19 +9,6 @@
 - **Image Puzzle** — Upload an image, choose the difficulty, and drag scattered jigsaw pieces into the correct positions.
 - **Typing Test** — Type a passage for 30 seconds and track your WPM and accuracy.
 
-## ✨ Features
-
-- Retro arcade-inspired visual design
-- Responsive layout for desktop and mobile
-- Game popups designed to fit normal laptop screens
-- Interactive Wordle keyboard and hints
-- Drag-and-drop image puzzle
-- Chess move highlighting
-- Typing speed and accuracy tracking
-- Win celebrations with trophy and confetti animations
-- Local game statistics
-- Centered footer with GitHub and LinkedIn links
-
 ## 🛠️ Technologies
 
 - HTML5
