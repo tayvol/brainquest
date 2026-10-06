@@ -1,6 +1,7 @@
 # BrainQuest 🧠🎮
 
-**BrainQuest** is a retro-inspired browser arcade built around short, interactive games that challenge different thinking skills.
+<img width="947" height="435" alt="image" src="https://github.com/user-attachments/assets/17f6ffb3-554a-4235-acc3-56ad330ba344" />
+
 
 ## 🎮 Games
 
