@@ -7,7 +7,7 @@ function celebrateGame(title,subtitle){
   el.id="gameCelebration";
   el.className="game-celebration";
   el.innerHTML='<div class="confetti" aria-hidden="true">🎉 ✦ ⭐ ✦ 🎊 ✦ ⭐ ✦ 🎉</div><div class="trophy" aria-hidden="true">🏆</div><h2>'+title+'</h2><p>'+subtitle+'</p><div class="celebrate-stars" aria-hidden="true">✦ ✦ ✦</div>';
-  root.appendChild(el);
+  (modal||root).appendChild(el);
   setTimeout(()=>el.classList.add("show"),20);
 }
 
