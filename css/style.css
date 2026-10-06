@@ -861,3 +861,30 @@ main{
     width:290px;
   }
 }
+
+
+/* Typing passage safety — keep every character inside the game frame */
+.target{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  white-space:normal;
+}
+.target span{
+  overflow-wrap:anywhere;
+}
+.typing{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  display:block;
+  resize:vertical;
+  overflow-wrap:anywhere;
+  white-space:pre-wrap;
+}
+@media(max-width:600px){
+  .target{font-size:13px;line-height:1.65;padding:10px;}
+  .typing{min-height:100px;font-size:13px;}
+}
