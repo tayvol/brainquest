@@ -888,3 +888,44 @@ main{
   .target{font-size:13px;line-height:1.65;padding:10px;}
   .typing{min-height:100px;font-size:13px;}
 }
+
+
+/* Image puzzle refinement — hidden guide lines + scattered tray pieces */
+.puzzle-slot{
+  background:transparent;
+  border:0;
+}
+.puzzle-slot.drop-ready{
+  background:#e889d855;
+  outline:3px solid #e889d8;
+  outline-offset:-3px;
+}
+.puzzle-slot.filled{
+  border:0;
+  background:transparent;
+}
+.piece-tray{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  align-content:start;
+  justify-items:center;
+}
+.piece-tray .jpiece{
+  width:92%;
+  transform:rotate(var(--scatter-rotation,0deg)) translate(var(--scatter-x,0px),var(--scatter-y,0px));
+}
+.piece-tray .jpiece:nth-child(3n+1){--scatter-rotation:-7deg;--scatter-x:-3px;--scatter-y:3px}
+.piece-tray .jpiece:nth-child(3n+2){--scatter-rotation:5deg;--scatter-x:2px;--scatter-y:-2px}
+.piece-tray .jpiece:nth-child(3n){--scatter-rotation:-3deg;--scatter-x:4px;--scatter-y:4px}
+.piece-tray .jpiece:nth-child(5n){--scatter-rotation:8deg;--scatter-x:-2px;--scatter-y:-3px}
+.piece-tray .jpiece:hover{
+  transform:rotate(0deg) scale(1.06);
+  z-index:5;
+}
+@media(max-width:900px){
+  .piece-tray .jpiece{width:88%}
+}
+@media(max-width:600px){
+  .piece-tray{grid-template-columns:repeat(4,1fr)}
+}
