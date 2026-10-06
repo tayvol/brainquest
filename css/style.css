@@ -1082,3 +1082,39 @@ main{
 @media(max-width:900px){
   .wordle-side .msg{font-size:12px;margin-top:8px}
 }
+
+
+/* Wordle hint — prominent, below keyboard, with a clear attention animation */
+.wordle-side .msg{
+  width:100%;
+  margin:12px 0 0;
+  min-height:38px;
+  padding:9px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:2px solid #111;
+  border-radius:5px;
+  background:#fff4a8;
+  color:#111;
+  font-size:15px;
+  line-height:1.35;
+  font-weight:900;
+  text-align:center;
+  box-shadow:3px 3px 0 #111;
+}
+.wordle-side .msg.hint-visible{
+  animation:hintHighlight .9s ease-out;
+}
+@keyframes hintHighlight{
+  0%{transform:scale(.96);background:#fff4a8;box-shadow:3px 3px 0 #111}
+  35%{transform:scale(1.05);background:#ffcf3f;box-shadow:5px 5px 0 #111}
+  65%{transform:scale(1.02);background:#e889d8;box-shadow:4px 4px 0 #111}
+  100%{transform:scale(1);background:#fff4a8;box-shadow:3px 3px 0 #111}
+}
+@media(max-width:900px){
+  .wordle-side .msg{font-size:14px;margin-top:10px;min-height:36px}
+}
+@media(max-width:600px){
+  .wordle-side .msg{font-size:13px;padding:8px 9px}
+}
