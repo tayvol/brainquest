@@ -1,4 +1,4 @@
-# BrainQuest 🧠🎮
+# BrainQuest
 
 <img width="947" height="435" alt="image" src="https://github.com/user-attachments/assets/17f6ffb3-554a-4235-acc3-56ad330ba344" />
 
