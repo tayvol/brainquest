@@ -671,3 +671,192 @@ main{
   .puzzle-game{gap:10px}
   .piece-tray{grid-template-columns:repeat(4,1fr)}
 }
+
+/* Final laptop viewport pass — game windows intentionally compact */
+@media (min-width: 901px){
+  .modal{
+    padding:20px;
+    align-items:center;
+  }
+  .panel{
+    width:min(820px,88vw);
+    max-height:88vh;
+    overflow:hidden;
+    padding:11px 14px;
+    border-width:2px;
+    box-shadow:6px 6px 0 #111;
+  }
+  .panel .mh{
+    min-height:30px;
+    align-items:center;
+  }
+  .panel .mh h2{
+    font-size:22px;
+    line-height:1;
+    margin:0;
+  }
+  .panel .close{
+    font-size:18px;
+    padding:1px 8px;
+  }
+  .panel .toolbar{
+    margin:8px 0;
+  }
+  .panel .pill,.panel .ghost{
+    padding:5px 8px;
+    font-size:10px;
+  }
+
+  /* Wordle: fit the complete game in a normal laptop viewport */
+  .panel:has(.wordle-layout){
+    width:min(760px,84vw);
+  }
+  .wordle-layout{
+    grid-template-columns:245px 245px;
+    gap:18px;
+    max-width:508px;
+    margin:5px auto;
+  }
+  .wb{
+    width:245px;
+  }
+  .wr{
+    gap:4px;
+    margin:3px 0;
+  }
+  .wc{
+    font-size:17px;
+    border-width:2px;
+  }
+  .keys{
+    max-width:245px;
+    gap:3px;
+  }
+  .kr{gap:2px}
+  .key{
+    height:28px;
+    min-width:21px;
+    padding:0 3px;
+    font-size:9px;
+    border-width:1px;
+    box-shadow:1px 1px 0 #111;
+  }
+  .wide{min-width:38px}
+  .panel .msg{
+    margin:4px 8px;
+    min-height:17px;
+    font-size:10px;
+  }
+
+  /* Chess */
+  .panel:has(.chess-wrap){
+    width:min(620px,78vw);
+  }
+  .chess-wrap{
+    width:min(380px,58vh,72vw);
+    margin:5px auto;
+  }
+  .cb{
+    border-width:3px;
+    box-shadow:3px 3px 0 #111;
+  }
+  .sq{
+    font-size:clamp(18px,4.2vh,34px);
+  }
+  .chess-wrap + .msg{
+    margin:3px 8px;
+  }
+
+  /* Jigsaw */
+  .panel:has(.puzzle-game){
+    width:min(760px,84vw);
+  }
+  .panel:has(.puzzle-game) .config{
+    gap:7px;
+  }
+  .panel:has(.puzzle-game) .box{
+    padding:8px;
+    border-width:2px;
+    box-shadow:2px 2px 0 #111;
+  }
+  .panel:has(.puzzle-game) .box label{
+    font-size:10px;
+    margin-bottom:4px;
+  }
+  .panel:has(.puzzle-game) .box input,
+  .panel:has(.puzzle-game) .box select{
+    padding:6px;
+    font-size:11px;
+  }
+  .puzzle-instructions{
+    font-size:10px;
+    margin:2px 0 5px;
+  }
+  .puzzle-game{
+    grid-template-columns:330px 245px;
+    gap:13px;
+    max-width:590px;
+  }
+  .puzzle-frame{
+    width:330px;
+    max-width:330px;
+    border-width:3px;
+    box-shadow:4px 4px 0 #111;
+  }
+  .piece-tray{
+    min-height:150px;
+    max-height:330px;
+    gap:6px;
+    padding:7px;
+    border-width:2px;
+  }
+  .jpiece{
+    border-width:1px;
+    box-shadow:1px 1px 0 #111;
+  }
+
+  /* Typing */
+  .panel:has(.typing){
+    width:min(760px,84vw);
+  }
+  .target{
+    margin:7px 0;
+    padding:10px;
+    line-height:1.55;
+  }
+  .typing{
+    min-height:90px;
+    padding:10px;
+  }
+  .tstats{
+    gap:6px;
+  }
+  .tstat{
+    padding:8px;
+  }
+  .tstat strong{
+    font-size:20px;
+  }
+}
+
+/* Short laptops / 768p displays */
+@media (min-width:901px) and (max-height:760px){
+  .panel{
+    max-height:94vh;
+    padding:8px 12px;
+  }
+  .panel:has(.wordle-layout) .wordle-layout{
+    transform:scale(.88);
+    transform-origin:top center;
+    margin-bottom:-45px;
+  }
+  .panel:has(.chess-wrap) .chess-wrap{
+    width:min(330px,50vh);
+  }
+  .panel:has(.puzzle-game) .puzzle-game{
+    grid-template-columns:290px 215px;
+  }
+  .panel:has(.puzzle-game) .puzzle-frame{
+    width:290px;
+  }
+}
