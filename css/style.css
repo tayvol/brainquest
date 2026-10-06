@@ -435,3 +435,67 @@ main{
   .heading h2{font-size:39px}
 }
 
+
+/* BrainQuest motion */
+.hero .orb .core{
+  animation: robotFloat 4s ease-in-out infinite;
+}
+.float{
+  animation: cardFloat 3.5s ease-in-out infinite;
+}
+.f2{animation-delay:-.8s}
+.f3{animation-delay:-1.6s}
+.f4{animation-delay:-2.4s}
+.orbit{
+  position:absolute;
+  width:310px;
+  height:310px;
+  border:2px dashed #111;
+  border-radius:50%;
+  left:50%;
+  top:45%;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  opacity:.45;
+  animation: spin 18s linear infinite;
+}
+.orbit:after{
+  content:"";
+  position:absolute;
+  width:12px;
+  height:12px;
+  background:#ff9c00;
+  border:2px solid #111;
+  border-radius:50%;
+  top:-7px;
+  left:50%;
+}
+.orbit-b{
+  width:240px;
+  height:240px;
+  animation-duration:12s;
+  animation-direction:reverse;
+  opacity:.3;
+}
+.card{
+  animation: cardEnter .6s both;
+}
+.card:nth-child(2){animation-delay:.08s}
+.card:nth-child(3){animation-delay:.16s}
+.card:nth-child(4){animation-delay:.24s}
+@keyframes robotFloat{
+  0%,100%{transform:translateY(0) rotate(-1deg)}
+  50%{transform:translateY(-14px) rotate(1deg)}
+}
+@keyframes cardFloat{
+  0%,100%{translate:0 0}
+  50%{translate:0 -9px}
+}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes cardEnter{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}
+}
